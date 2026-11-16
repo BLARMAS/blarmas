@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* Colori e font di Blarmas (vedi docs/DESIGN.md).
+   Dichiarandoli qui, Tailwind crea le classi: bg-sfondo, text-testo, border-bordo, ecc. */
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --color-sfondo: #f6f7f9;
+  --color-superficie: #ffffff;
+  --color-bordo: #e3e6eb;
+  --color-bordo-campo: #c9ced6;
+  --color-testo: #1a1d23;
+  --color-testo-sec: #5a6272;
+  --color-primario: #1f4fd8;
+  --color-primario-chiaro: #eef2fd;
+  --color-admin: #11213f;
+  --color-admin-campo: #1a2d52;
+  --color-admin-bordo: #3a4a6b;
+  --color-successo: #1d6b3a;
+  --color-successo-sfondo: #e3f5ea;
+  --color-attenzione: #8a5200;
+  --color-attenzione-sfondo: #fff2dc;
+  --color-attenzione-barra: #c77700;
+  --color-errore: #b3261e;
+  --color-primario-scuro: #1a43bd;
+  --color-colonna: #eceef2;
+  --color-avatar: #8ab8ff;
+}
+
+body {
+  background: var(--color-sfondo);
+  color: var(--color-testo);
+}
+
+/* Anello di focus ben visibile per chi usa la tastiera */
+:focus-visible {
+  outline: 2px solid var(--color-primario);
+  outline-offset: 2px;
+}
