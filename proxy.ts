@@ -52,6 +52,6 @@ function reindirizza(request: NextRequest, verso: string, risposta: NextResponse
 }
 
 export const config = {
-  // Tutte le pagine tranne i file interni di Next e le immagini
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  // Tutte le pagine tranne i file interni di Next, il manifest dell'app e le immagini
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };

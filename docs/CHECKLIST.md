@@ -50,3 +50,8 @@ Le pagine hanno la grafica fatta e usano i dati veri di Supabase. Report, Templa
 - [x] Integrazioni (`13-integrazioni.png`)
 - [x] Calendario, Timeline: calcolati dalle attività e dai progetti
 - [ ] Report e tempo (servono registro ore e date di chiusura), Template, Integrazioni, Notifiche
+
+## App installabile (PWA)
+- [x] Manifest, icone e impostazioni per iPhone e Android
+- [ ] Funzionamento senza internet (service worker e dati salvati sul telefono)
+- [ ] Notifiche push
