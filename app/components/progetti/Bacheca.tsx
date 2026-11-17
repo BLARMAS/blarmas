@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { stati, type Attivita, type Stato } from "../../lib/tipi";
+import { formattaOre, oreRestantiAttivita, stati, type Attivita, type Stato } from "../../lib/tipi";
 import { formattaData } from "../../lib/date";
 
 type BachecaProps = {
@@ -68,6 +68,11 @@ export default function Bacheca({ attivita, onApri, onSposta, puoSpostare }: Bac
                     <span className="mt-1 block text-[13px] text-testo-sec">
                       {a.stato === "Fatto" ? "Chiusa" : "Scadenza"} {formattaData(a.scadenza)} · {a.assegnatario}
                     </span>
+                    {a.ore !== null && a.stato !== "Fatto" && (
+                      <span className="mt-1 block text-[13px] font-semibold text-primario">
+                        Restano {formattaOre(oreRestantiAttivita(a) ?? 0)} su {formattaOre(a.ore)}
+                      </span>
+                    )}
                   </button>
                 </li>
               ))}

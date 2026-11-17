@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { creaClientBrowser } from "../../lib/supabase/client";
-import { stati, type Attivita, type Stato } from "../../lib/tipi";
+import { formattaEffort, formattaOre, oreRestantiAttivita, stati, type Attivita, type Stato } from "../../lib/tipi";
 import { formattaData } from "../../lib/date";
 import { useRuoli } from "../SessioneContext";
 import Badge from "../ui/Badge";
@@ -16,6 +16,15 @@ type PannelloProps = {
   onChiudi: () => void;
   onCambiaStato: (id: string, stato: Stato) => void;
 };
+
+// Le ore che restano. Se si superano le ore assegnate lo dice.
+function testoRestanti(a: Attivita) {
+  const restanti = oreRestantiAttivita(a);
+  if (restanti === null) return "—";
+  if (a.oreConsumate > a.ore!) return `Superate di ${formattaOre(a.oreConsumate - a.ore!)}`;
+  if (a.stato === "Fatto") return "0 h (attività conclusa)";
+  return formattaEffort(restanti);
+}
 
 const tonoStato = { "Da fare": "attenzione", "In corso": "primario", Fatto: "successo" } as const;
 
@@ -92,6 +101,12 @@ export default function PannelloAttivita({ attivita, onChiudi, onCambiaStato }: 
           <dd>{formattaData(attivita.scadenza, "lunga")}</dd>
           <dt className="text-testo-sec">Priorità</dt>
           <dd>{attivita.priorita}</dd>
+          <dt className="text-testo-sec">Effort</dt>
+          <dd>{attivita.ore !== null ? formattaEffort(attivita.ore) : "Non indicato"}</dd>
+          <dt className="text-testo-sec">Consumate</dt>
+          <dd>{attivita.oreConsumate > 0 ? formattaEffort(attivita.oreConsumate) : "Nessuna"}</dd>
+          <dt className="font-semibold text-testo">Restanti</dt>
+          <dd className="font-semibold">{testoRestanti(attivita)}</dd>
           <dt className="text-testo-sec">Etichette</dt>
           <dd>{attivita.etichette.length ? attivita.etichette.join(", ") : "Nessuna"}</dd>
         </dl>

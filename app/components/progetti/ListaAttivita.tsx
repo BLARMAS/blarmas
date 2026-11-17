@@ -1,4 +1,4 @@
-import type { Attivita } from "../../lib/tipi";
+import { formattaOre, oreRestantiAttivita, type Attivita } from "../../lib/tipi";
 import { formattaData } from "../../lib/date";
 import { Cella, Tabella } from "../ui/Tabella";
 
@@ -32,6 +32,11 @@ export default function ListaAttivita({
             <button type="button" onClick={() => onApri(a.id)} className="min-h-11 text-left font-medium hover:text-primario hover:underline">
               {a.titolo}
             </button>
+            {a.ore !== null && a.stato !== "Fatto" && (
+              <span className="block text-[13px] font-semibold text-primario">
+                Restano {formattaOre(oreRestantiAttivita(a) ?? 0)} su {formattaOre(a.ore)}
+              </span>
+            )}
           </Cella>
           <Cella className={coloreStato[a.stato]}>{a.stato}</Cella>
           <Cella>{a.assegnatario}</Cella>

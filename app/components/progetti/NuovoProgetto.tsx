@@ -7,11 +7,12 @@ import type { Progetto } from "../../lib/tipi";
 import { useRuoli, useSessione } from "../SessioneContext";
 import Bottone from "../ui/Bottone";
 import Campo from "../ui/Campo";
+import CampoEffort from "../ui/CampoEffort";
 import Finestra from "../ui/Finestra";
 
 type Props = {
   onChiudi: () => void;
-  progetto?: Pick<Progetto, "id" | "nome" | "scadenza">; // se c'è, la finestra serve a MODIFICARE quel progetto
+  progetto?: Pick<Progetto, "id" | "nome" | "scadenza" | "ore">; // se c'è, la finestra serve a MODIFICARE quel progetto
 };
 
 // La finestra con il modulo: crea un progetto nuovo, oppure ne modifica uno esistente.
@@ -21,7 +22,6 @@ export function FinestraNuovoProgetto({ onChiudi: chiudi, progetto }: Props) {
   const { organizzazioneId } = useSessione();
   const [errore, setErrore] = useState("");
   const [inCorso, setInCorso] = useState(false);
-
   return (
     <Finestra titolo={progetto ? "Modifica progetto" : "Nuovo progetto"} onChiudi={chiudi}>
       <form
@@ -36,11 +36,12 @@ export function FinestraNuovoProgetto({ onChiudi: chiudi, progetto }: Props) {
           setErrore("");
           setInCorso(true);
           const scadenza = String(dati.get("progetto-scadenza")) || null;
+          const ore = String(dati.get("progetto-effort")) === "" ? null : Number(dati.get("progetto-effort"));
           const tabella = creaClientBrowser().from("progetti");
           // Il database controlla che tu abbia il permesso (regole RLS)
           const { error } = progetto
-            ? await tabella.update({ nome, scadenza }).eq("id", progetto.id)
-            : await tabella.insert({ organizzazione_id: organizzazioneId, nome, scadenza });
+            ? await tabella.update({ nome, scadenza, ore }).eq("id", progetto.id)
+            : await tabella.insert({ organizzazione_id: organizzazioneId, nome, scadenza, ore });
           setInCorso(false);
           if (error) {
             setErrore("Non è stato possibile salvare il progetto. Riprova.");
@@ -53,6 +54,9 @@ export function FinestraNuovoProgetto({ onChiudi: chiudi, progetto }: Props) {
       >
         <Campo id="progetto-nome" etichetta="Nome del progetto" valoreIniziale={progetto?.nome} obbligatorio />
         <Campo id="progetto-scadenza" etichetta="Scadenza" tipo="date" valoreIniziale={progetto?.scadenza ?? undefined} obbligatorio />
+
+        <CampoEffort id="progetto-effort" etichetta="Effort del progetto" oreIniziali={progetto?.ore} />
+
         <p role="alert" className="text-sm text-errore">
           {errore}
         </p>

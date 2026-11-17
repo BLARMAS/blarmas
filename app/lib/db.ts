@@ -38,8 +38,12 @@ export const caricaSessione = cache(async (): Promise<Sessione | null> => {
   const orgId = corrente.organizzazione_id;
 
   const [{ data: membri }, { data: progetti }] = await Promise.all([
-    supabase.from("membri").select("id, nome, email, ruolo, stato").eq("organizzazione_id", orgId).order("creato_il"),
-    supabase.from("progetti").select("id, nome").eq("organizzazione_id", orgId).order("creato_il"),
+    supabase
+      .from("membri")
+      .select("id, nome, email, ruolo, stato, segnaposto, utente_id")
+      .eq("organizzazione_id", orgId)
+      .order("creato_il"),
+    supabase.from("progetti").select("id, nome, ore, attivita(ore)").eq("organizzazione_id", orgId).order("creato_il"),
   ]);
 
   return {
@@ -51,8 +55,13 @@ export const caricaSessione = cache(async (): Promise<Sessione | null> => {
     organizzazioneId: orgId,
     organizzazioneNome: corrente.organizzazioni.nome,
     organizzazioni: lista.map((m) => ({ id: m.organizzazione_id, nome: m.organizzazioni.nome })),
-    membri: (membri ?? []) as Membro[],
-    progetti: progetti ?? [],
+    // Dell'id dell'account si tiene solo "esiste o no": al browser non serve altro
+    membri: ((membri ?? []) as (Omit<Membro, "registrato"> & { utente_id: string | null })[]).map(
+      ({ utente_id, ...m }) => ({ ...m, registrato: utente_id !== null }),
+    ),
+    progetti: ((progetti ?? []) as { id: string; nome: string; ore: number | null; attivita: { ore: number | null }[] }[]).map(
+      ({ attivita, ...p }) => ({ ...p, orePianificate: attivita.reduce((somma, a) => somma + (a.ore ?? 0), 0) }),
+    ),
   };
 });
 
@@ -60,8 +69,9 @@ type RigaProgetto = {
   id: string;
   nome: string;
   scadenza: string | null;
+  ore: number | null;
   creato_il: string;
-  attivita: { stato: string; scadenza: string | null }[];
+  attivita: { stato: string; scadenza: string | null; ore: number | null; ore_consumate: number }[];
 };
 
 // Lo stato del progetto si calcola dalle sue attività:
@@ -76,16 +86,28 @@ export async function caricaProgetti(organizzazioneId: string, oggi: string): Pr
   const supabase = await creaClientServer();
   const { data } = await supabase
     .from("progetti")
-    .select("id, nome, scadenza, creato_il, attivita(stato, scadenza)")
+    .select("id, nome, scadenza, ore, creato_il, attivita(stato, scadenza, ore, ore_consumate)")
     .eq("organizzazione_id", organizzazioneId)
     .order("creato_il");
 
   return ((data ?? []) as RigaProgetto[]).map((p) => {
     const fatte = p.attivita.filter((a) => a.stato === "Fatto").length;
+    // Ore usate dal progetto = somma delle ore usate da ogni attività.
+    // Un'attività conclusa ("Fatto") conta almeno tutte le sue ore assegnate; se ne ha consumate di più, contano quelle.
+    // Un'attività non conclusa conta le ore che ha già consumato.
+    const orePianificate = p.attivita.reduce((somma, a) => somma + (a.ore ?? 0), 0);
+    const oreConsumate = p.attivita.reduce(
+      (somma, a) => somma + (a.stato === "Fatto" ? Math.max(a.ore ?? 0, a.ore_consumate) : a.ore_consumate),
+      0,
+    );
     return {
       id: p.id,
       nome: p.nome,
       scadenza: p.scadenza,
+      ore: p.ore,
+      orePianificate,
+      oreConsumate,
+      oreRestanti: p.ore === null ? null : Math.max(0, p.ore - oreConsumate),
       creato: p.creato_il.slice(0, 10),
       stato: calcolaStato(p.attivita, oggi),
       avanzamento: p.attivita.length ? Math.round((fatte / p.attivita.length) * 100) : 0,
@@ -103,6 +125,8 @@ type RigaAttivita = {
   priorita: Attivita["priorita"];
   scadenza: string | null;
   etichette: string[];
+  ore: number | null;
+  ore_consumate: number;
   assegnatario_id: string | null;
 };
 
@@ -111,7 +135,7 @@ export async function caricaAttivita(sessione: Sessione, progettoId?: string): P
   const supabase = await creaClientServer();
   let domanda = supabase
     .from("attivita")
-    .select("id, progetto_id, titolo, descrizione, stato, priorita, scadenza, etichette, assegnatario_id")
+    .select("id, progetto_id, titolo, descrizione, stato, priorita, scadenza, etichette, ore, ore_consumate, assegnatario_id")
     .eq("organizzazione_id", sessione.organizzazioneId)
     .order("creata_il");
   if (progettoId) domanda = domanda.eq("progetto_id", progettoId);
@@ -129,6 +153,8 @@ export async function caricaAttivita(sessione: Sessione, progettoId?: string): P
       priorita: a.priorita,
       scadenza: a.scadenza,
       etichette: a.etichette,
+      ore: a.ore,
+      oreConsumate: a.ore_consumate,
       assegnatarioId: a.assegnatario_id,
       assegnatario: persona ? nomeMembro(persona) : "Nessuno",
     };

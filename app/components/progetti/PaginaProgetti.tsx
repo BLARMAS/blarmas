@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { formattaData } from "../../lib/date";
-import type { Progetto, StatoProgetto } from "../../lib/tipi";
+import { formattaEffort, formattaOre, type Progetto, type StatoProgetto } from "../../lib/tipi";
 import Badge from "../ui/Badge";
 import BarraProgresso from "../ui/BarraProgresso";
 import Statistica from "../ui/Statistica";
@@ -58,6 +58,11 @@ export default function PaginaProgetti({ progetti, inScadenza, completate }: Pro
                 <span>{p.avanzamento}% completato</span>
                 <span>{p.scadenza ? `Scadenza ${formattaData(p.scadenza)}` : "Senza scadenza"}</span>
               </p>
+              {p.ore !== null && p.oreRestanti !== null && (
+                <p className="mt-1 text-sm text-testo-sec">
+                  Restano {formattaOre(p.oreRestanti)} su {formattaEffort(p.ore)}
+                </p>
+              )}
             </li>
           ))}
         </ul>

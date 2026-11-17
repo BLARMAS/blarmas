@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { creaClientBrowser } from "../../lib/supabase/client";
-import { nomeMembro, prioritaPossibili, type Attivita } from "../../lib/tipi";
+import { formattaEffort, formattaOre, nomeMembro, prioritaPossibili, type Attivita } from "../../lib/tipi";
 import { useRuoli, useSessione } from "../SessioneContext";
 import Bottone from "../ui/Bottone";
 import Campo from "../ui/Campo";
+import CampoEffort from "../ui/CampoEffort";
 import Finestra from "../ui/Finestra";
 import Selezione from "../ui/Selezione";
 
@@ -26,6 +27,18 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
   const [errore, setErrore] = useState("");
   const [inCorso, setInCorso] = useState(false);
   const attivi = membri.filter((m) => m.stato === "attivo");
+  // Ore assegnate e ore consumate, lette mentre si scrivono, per mostrare subito quelle restanti
+  const [oreAssegnate, setOreAssegnate] = useState<number | null>(attivita?.ore ?? null);
+  const [oreConsumate, setOreConsumate] = useState<number | null>(attivita?.oreConsumate ?? 0);
+  const consumate = oreConsumate ?? 0;
+  // Il progetto scelto (quello della pagina, oppure quello del menu a tendina) e le sue ore già assegnate
+  const [progettoScelto, setProgettoScelto] = useState(attivita?.progettoId ?? progettoId ?? progetti[0]?.id);
+  const progetto = progetti.find((p) => p.id === progettoScelto);
+  // Ore assegnate alle altre attività del progetto + quelle di questa (senza contare due volte l'attività che si sta modificando)
+  const totaleConQuesta =
+    progetto && oreAssegnate !== null
+      ? progetto.orePianificate - (attivita && attivita.progettoId === progetto.id ? (attivita.ore ?? 0) : 0) + oreAssegnate
+      : null;
 
   return (
     <Finestra titolo={attivita ? "Modifica attività" : "Nuova attività"} onChiudi={chiudi}>
@@ -56,6 +69,8 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
               assegnatario_id: String(dati.get("attivita-assegnatario")) || null,
               priorita: String(dati.get("attivita-priorita")),
               scadenza: String(dati.get("attivita-scadenza")) || null,
+              ore: String(dati.get("attivita-effort")) === "" ? null : Number(dati.get("attivita-effort")),
+              ore_consumate: String(dati.get("attivita-consumate")) === "" ? 0 : Number(dati.get("attivita-consumate")),
               // "Design, Sito" -> ["Design", "Sito"]
               etichette: String(dati.get("attivita-etichette"))
                 .split(",")
@@ -85,7 +100,13 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
               <label htmlFor="attivita-progetto" className="text-sm font-semibold">
                 Progetto
               </label>
-              <select id="attivita-progetto" name="attivita-progetto" className={campoSelect}>
+              <select
+                id="attivita-progetto"
+                name="attivita-progetto"
+                value={progettoScelto}
+                onChange={(e) => setProgettoScelto(e.target.value)}
+                className={campoSelect}
+              >
                 {progetti.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.nome}
@@ -138,6 +159,47 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
             valoreIniziale={attivita?.scadenza ?? undefined}
             obbligatorio
           />
+          <CampoEffort
+            id="attivita-effort"
+            etichetta="Effort dell'attività (ore assegnate)"
+            oreIniziali={attivita?.ore}
+            onCambia={setOreAssegnate}
+          />
+          <CampoEffort
+            id="attivita-consumate"
+            etichetta="Ore già consumate"
+            oreIniziali={attivita?.oreConsumate ?? 0}
+            onCambia={setOreConsumate}
+          />
+          {/* Anteprima: si aggiorna mentre scrivi */}
+          {oreAssegnate !== null && (
+            <p
+              aria-live="polite"
+              className={`rounded-lg px-3 py-2.5 text-[15px] font-semibold ${
+                consumate > oreAssegnate ? "bg-attenzione-sfondo text-attenzione" : "bg-primario-chiaro text-primario"
+              }`}
+            >
+              {consumate > oreAssegnate
+                ? `Hai superato le ore assegnate di ${formattaOre(consumate - oreAssegnate)}`
+                : attivita?.stato === "Fatto"
+                  ? "Attività conclusa: non restano ore"
+                  : `Restano ${formattaEffort(oreAssegnate - consumate)}`}
+            </p>
+          )}
+          {/* Avviso sulle ore del progetto: non blocca, informa */}
+          {progetto && progetto.ore !== null && totaleConQuesta !== null && totaleConQuesta >= progetto.ore && progetto.ore > 0 && (
+            <p
+              role="status"
+              className={`rounded-lg px-3 py-2.5 text-[15px] font-semibold ${
+                totaleConQuesta > progetto.ore ? "bg-attenzione-sfondo text-attenzione" : "bg-primario-chiaro text-primario"
+              }`}
+            >
+              {totaleConQuesta > progetto.ore
+                ? `Con questa attività le ore assegnate (${formattaOre(totaleConQuesta)}) superano l'effort del progetto (${formattaOre(progetto.ore)}) di ${formattaOre(totaleConQuesta - progetto.ore)}.`
+                : `Con questa attività assegni tutte le ore del progetto (${formattaOre(progetto.ore)}).`}
+            </p>
+          )}
+
           <Campo
             id="attivita-etichette"
             etichetta="Etichette (separate da virgola)"

@@ -38,6 +38,7 @@ Le pagine hanno la grafica fatta e usano i dati veri di Supabase. Report, Templa
 - [x] Team (`08-team.png`)
 - [x] "Invita persone" con modulo (la persona viene registrata come invitata, senza email)
 - [ ] Inviti veri con email
+- [x] Modifica ed eliminazione delle persone del team (solo admin), stato Sospeso, persona segnaposto "Da assegnare", ultimo admin protetto
 - [x] Menu "+ Nuovo" in alto (progetto, attività, invito) e "+ Aggiungi" nei promemoria
 - [x] Profilo `/profilo` e menu sul cerchio "AS" (senza grafica di riferimento)
 - [x] Profilo: nome, password e uscita vere (Supabase)
@@ -50,6 +51,9 @@ Le pagine hanno la grafica fatta e usano i dati veri di Supabase. Report, Templa
 - [x] Integrazioni (`13-integrazioni.png`)
 - [x] Calendario, Timeline: calcolati dalle attività e dai progetti
 - [ ] Report e tempo (servono registro ore e date di chiusura), Template, Integrazioni, Notifiche
+
+## Effort
+- [x] Effort di progetti e attività (gg / h), con ore consumate per attività e ore restanti del progetto calcolate
 
 ## App installabile (PWA)
 - [x] Manifest, icone e impostazioni per iPhone e Android
