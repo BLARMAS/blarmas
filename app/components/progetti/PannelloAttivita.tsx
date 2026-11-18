@@ -97,6 +97,8 @@ export default function PannelloAttivita({ attivita, onChiudi, onCambiaStato }: 
           </dd>
           <dt className="text-testo-sec">Assegnata a</dt>
           <dd>{attivita.assegnatario}</dd>
+          <dt className="text-testo-sec">Inizio</dt>
+          <dd>{attivita.inizio ? formattaData(attivita.inizio, "lunga") : "Non indicato"}</dd>
           <dt className="text-testo-sec">Scadenza</dt>
           <dd>{formattaData(attivita.scadenza, "lunga")}</dd>
           <dt className="text-testo-sec">Priorità</dt>

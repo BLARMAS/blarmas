@@ -56,7 +56,13 @@ export default function PaginaProgetti({ progetti, inScadenza, completate }: Pro
               </div>
               <p className="mt-2 flex justify-between text-sm text-testo-sec">
                 <span>{p.avanzamento}% completato</span>
-                <span>{p.scadenza ? `Scadenza ${formattaData(p.scadenza)}` : "Senza scadenza"}</span>
+                <span>
+                  {p.inizio && p.scadenza
+                    ? `Dal ${formattaData(p.inizio)} al ${formattaData(p.scadenza)}`
+                    : p.scadenza
+                      ? `Scadenza ${formattaData(p.scadenza)}`
+                      : "Senza scadenza"}
+                </span>
               </p>
               {p.ore !== null && p.oreRestanti !== null && (
                 <p className="mt-1 text-sm text-testo-sec">

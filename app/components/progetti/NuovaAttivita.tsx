@@ -57,6 +57,12 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
             e.preventDefault();
             const dati = new FormData(e.currentTarget);
             const titolo = String(dati.get("attivita-titolo")).trim();
+            const inizio = String(dati.get("attivita-inizio")) || null;
+            const scadenza = String(dati.get("attivita-scadenza")) || null;
+            if (inizio && scadenza && inizio > scadenza) {
+              setErrore("La data di inizio non può essere dopo la scadenza.");
+              return;
+            }
             if (!titolo) {
               setErrore("Scrivi il titolo dell'attività.");
               return;
@@ -68,7 +74,8 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
               descrizione: String(dati.get("attivita-descrizione")).trim(),
               assegnatario_id: String(dati.get("attivita-assegnatario")) || null,
               priorita: String(dati.get("attivita-priorita")),
-              scadenza: String(dati.get("attivita-scadenza")) || null,
+              inizio,
+              scadenza,
               ore: String(dati.get("attivita-effort")) === "" ? null : Number(dati.get("attivita-effort")),
               ore_consumate: String(dati.get("attivita-consumate")) === "" ? 0 : Number(dati.get("attivita-consumate")),
               // "Design, Sito" -> ["Design", "Sito"]
@@ -152,13 +159,16 @@ export function FinestraNuovaAttivita({ progettoId, onChiudi: chiudi, attivita }
             <Selezione id="attivita-priorita" etichetta="Priorità" opzioni={prioritaPossibili} valoreIniziale={attivita?.priorita ?? "Media"} />
           </div>
 
-          <Campo
-            id="attivita-scadenza"
-            etichetta="Scadenza"
-            tipo="date"
-            valoreIniziale={attivita?.scadenza ?? undefined}
-            obbligatorio
-          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Campo id="attivita-inizio" etichetta="Data di inizio" tipo="date" valoreIniziale={attivita?.inizio ?? undefined} />
+            <Campo
+              id="attivita-scadenza"
+              etichetta="Scadenza"
+              tipo="date"
+              valoreIniziale={attivita?.scadenza ?? undefined}
+              obbligatorio
+            />
+          </div>
           <CampoEffort
             id="attivita-effort"
             etichetta="Effort dell'attività (ore assegnate)"

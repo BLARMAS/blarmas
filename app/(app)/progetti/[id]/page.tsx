@@ -18,9 +18,10 @@ export default function ProgettoPage({ params }: PageProps<"/progetti/[id]">) {
 async function Contenuto({ params }: { params: PageProps<"/progetti/[id]">["params"] }) {
   const { id } = await params;
   const sessione = (await caricaSessione())!; // il layout ha già controllato che ci sia
-  const progetti = await caricaProgetti(sessione.organizzazioneId, oggiIso());
+  const oggi = oggiIso();
+  const progetti = await caricaProgetti(sessione.organizzazioneId, oggi);
   const progetto = progetti.find((p) => p.id === id);
   const attivita = progetto ? await caricaAttivita(sessione, id) : [];
 
-  return <PaginaProgetto progetto={progetto} attivita={attivita} />;
+  return <PaginaProgetto progetto={progetto} attivita={attivita} oggi={oggi} />;
 }

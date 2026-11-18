@@ -52,6 +52,15 @@ Le pagine hanno la grafica fatta e usano i dati veri di Supabase. Report, Templa
 - [x] Calendario, Timeline: calcolati dalle attività e dai progetti
 - [ ] Report e tempo (servono registro ore e date di chiusura), Template, Integrazioni, Notifiche
 
+## Date
+- [x] Data di inizio (facoltativa) di progetti e attività; la timeline parte da lì
+
+## Carico di lavoro
+- [x] Pagina "Carico di lavoro": impegno di ogni persona per periodo e per progetto, con dettaglio delle attività
+- [x] Scheda "Team" dentro il progetto
+- [x] Calendario del carico: ore previste per persona e per giorno (8 h = giornata piena)
+- [ ] Capacità diversa per persona (part-time, ferie)
+
 ## Effort
 - [x] Effort di progetti e attività (gg / h), con ore consumate per attività e ore restanti del progetto calcolate
 

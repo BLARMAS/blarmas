@@ -12,7 +12,7 @@ import Finestra from "../ui/Finestra";
 
 type Props = {
   onChiudi: () => void;
-  progetto?: Pick<Progetto, "id" | "nome" | "scadenza" | "ore">; // se c'è, la finestra serve a MODIFICARE quel progetto
+  progetto?: Pick<Progetto, "id" | "nome" | "inizio" | "scadenza" | "ore">; // se c'è, la finestra serve a MODIFICARE quel progetto
 };
 
 // La finestra con il modulo: crea un progetto nuovo, oppure ne modifica uno esistente.
@@ -36,12 +36,18 @@ export function FinestraNuovoProgetto({ onChiudi: chiudi, progetto }: Props) {
           setErrore("");
           setInCorso(true);
           const scadenza = String(dati.get("progetto-scadenza")) || null;
+          const inizio = String(dati.get("progetto-inizio")) || null;
+          if (inizio && scadenza && inizio > scadenza) {
+            setErrore("La data di inizio non può essere dopo la scadenza.");
+            setInCorso(false);
+            return;
+          }
           const ore = String(dati.get("progetto-effort")) === "" ? null : Number(dati.get("progetto-effort"));
           const tabella = creaClientBrowser().from("progetti");
           // Il database controlla che tu abbia il permesso (regole RLS)
           const { error } = progetto
-            ? await tabella.update({ nome, scadenza, ore }).eq("id", progetto.id)
-            : await tabella.insert({ organizzazione_id: organizzazioneId, nome, scadenza, ore });
+            ? await tabella.update({ nome, inizio, scadenza, ore }).eq("id", progetto.id)
+            : await tabella.insert({ organizzazione_id: organizzazioneId, nome, inizio, scadenza, ore });
           setInCorso(false);
           if (error) {
             setErrore("Non è stato possibile salvare il progetto. Riprova.");
@@ -53,7 +59,10 @@ export function FinestraNuovoProgetto({ onChiudi: chiudi, progetto }: Props) {
         className="space-y-4"
       >
         <Campo id="progetto-nome" etichetta="Nome del progetto" valoreIniziale={progetto?.nome} obbligatorio />
-        <Campo id="progetto-scadenza" etichetta="Scadenza" tipo="date" valoreIniziale={progetto?.scadenza ?? undefined} obbligatorio />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Campo id="progetto-inizio" etichetta="Data di inizio" tipo="date" valoreIniziale={progetto?.inizio ?? undefined} />
+          <Campo id="progetto-scadenza" etichetta="Scadenza" tipo="date" valoreIniziale={progetto?.scadenza ?? undefined} obbligatorio />
+        </div>
 
         <CampoEffort id="progetto-effort" etichetta="Effort del progetto" oreIniziali={progetto?.ore} />
 

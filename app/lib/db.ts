@@ -68,6 +68,7 @@ export const caricaSessione = cache(async (): Promise<Sessione | null> => {
 type RigaProgetto = {
   id: string;
   nome: string;
+  inizio: string | null;
   scadenza: string | null;
   ore: number | null;
   creato_il: string;
@@ -86,7 +87,7 @@ export async function caricaProgetti(organizzazioneId: string, oggi: string): Pr
   const supabase = await creaClientServer();
   const { data } = await supabase
     .from("progetti")
-    .select("id, nome, scadenza, ore, creato_il, attivita(stato, scadenza, ore, ore_consumate)")
+    .select("id, nome, inizio, scadenza, ore, creato_il, attivita(stato, scadenza, ore, ore_consumate)")
     .eq("organizzazione_id", organizzazioneId)
     .order("creato_il");
 
@@ -103,6 +104,7 @@ export async function caricaProgetti(organizzazioneId: string, oggi: string): Pr
     return {
       id: p.id,
       nome: p.nome,
+      inizio: p.inizio,
       scadenza: p.scadenza,
       ore: p.ore,
       orePianificate,
@@ -123,6 +125,7 @@ type RigaAttivita = {
   descrizione: string;
   stato: Attivita["stato"];
   priorita: Attivita["priorita"];
+  inizio: string | null;
   scadenza: string | null;
   etichette: string[];
   ore: number | null;
@@ -135,7 +138,7 @@ export async function caricaAttivita(sessione: Sessione, progettoId?: string): P
   const supabase = await creaClientServer();
   let domanda = supabase
     .from("attivita")
-    .select("id, progetto_id, titolo, descrizione, stato, priorita, scadenza, etichette, ore, ore_consumate, assegnatario_id")
+    .select("id, progetto_id, titolo, descrizione, stato, priorita, inizio, scadenza, etichette, ore, ore_consumate, assegnatario_id")
     .eq("organizzazione_id", sessione.organizzazioneId)
     .order("creata_il");
   if (progettoId) domanda = domanda.eq("progetto_id", progettoId);
@@ -151,6 +154,7 @@ export async function caricaAttivita(sessione: Sessione, progettoId?: string): P
       descrizione: a.descrizione,
       stato: a.stato,
       priorita: a.priorita,
+      inizio: a.inizio,
       scadenza: a.scadenza,
       etichette: a.etichette,
       ore: a.ore,

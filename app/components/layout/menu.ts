@@ -7,6 +7,7 @@ export const vociMenu = [
   { nome: "Timeline", href: "/timeline" },
   { nome: "Report", href: "/report" },
   { nome: "Team", href: "/team" },
+  { nome: "Carico di lavoro", href: "/carico" },
   { nome: "Template", href: "/template" },
   { nome: "Integrazioni", href: "/integrazioni" },
 ];

@@ -15,7 +15,7 @@ export default async function TimelinePage() {
     <>
       <TitoloPagina
         titolo="Timeline"
-        sotto="I progetti dalla creazione alla scadenza, nelle prossime 8 settimane."
+        sotto="I progetti dall'inizio alla scadenza, nelle prossime 8 settimane."
       />
       <TimelineGantt progetti={progetti} oggi={oggi} />
     </>

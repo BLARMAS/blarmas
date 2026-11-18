@@ -5,6 +5,7 @@ import { useState } from "react";
 import { creaClientBrowser } from "../../lib/supabase/client";
 import { nomeMembro, prioritaPossibili, type Attivita, type Stato } from "../../lib/tipi";
 import { useRuoli, useSessione } from "../SessioneContext";
+import TabellaCarico from "../carico/TabellaCarico";
 import Bacheca from "./Bacheca";
 import ListaAttivita from "./ListaAttivita";
 import PannelloAttivita from "./PannelloAttivita";
@@ -13,11 +14,11 @@ const campoFiltro = "h-11 rounded-lg border border-bordo-campo bg-superficie px-
 
 // Parte interattiva della pagina di un progetto: bacheca/lista, filtri e pannello di dettaglio.
 // Le attività arrivano dal server; le modifiche si salvano su Supabase e poi la pagina si aggiorna.
-export default function VistaProgetto({ attivita }: { attivita: Attivita[] }) {
+export default function VistaProgetto({ attivita, oggi }: { attivita: Attivita[]; oggi: string }) {
   const router = useRouter();
   const { membri } = useSessione();
   const { puoScrivere } = useRuoli();
-  const [vista, setVista] = useState<"bacheca" | "lista">("bacheca");
+  const [vista, setVista] = useState<"bacheca" | "lista" | "team">("bacheca");
   const [aperta, setAperta] = useState<string | null>(null);
   const [errore, setErrore] = useState("");
   const [ricerca, setRicerca] = useState("");
@@ -44,7 +45,7 @@ export default function VistaProgetto({ attivita }: { attivita: Attivita[] }) {
     router.refresh(); // rilegge i dati dal server
   }
 
-  const bottoneVista = (v: "bacheca" | "lista", nome: string) => (
+  const bottoneVista = (v: "bacheca" | "lista" | "team", nome: string) => (
     <button
       type="button"
       aria-pressed={vista === v}
@@ -67,8 +68,11 @@ export default function VistaProgetto({ attivita }: { attivita: Attivita[] }) {
         <div className="flex gap-1 rounded-xl bg-colonna p-1" role="group" aria-label="Tipo di vista">
           {bottoneVista("bacheca", "Bacheca")}
           {bottoneVista("lista", "Lista")}
+          {bottoneVista("team", "Team")}
         </div>
 
+        {vista !== "team" && (
+          <>
         <div>
           <label htmlFor="cerca-attivita" className="sr-only">
             Cerca attività
@@ -110,13 +114,17 @@ export default function VistaProgetto({ attivita }: { attivita: Attivita[] }) {
             ))}
           </select>
         </div>
+          </>
+        )}
       </form>
 
       <p role="alert" className="mb-3 text-sm text-errore">
         {errore}
       </p>
 
-      {attivita.length === 0 ? (
+      {vista === "team" ? (
+        <TabellaCarico attivita={attivita} oggi={oggi} />
+      ) : attivita.length === 0 ? (
         <p className="rounded-xl border border-bordo bg-superficie p-5 text-testo-sec">
           Questo progetto non ha ancora attività.{puoScrivere && " Creane una con il bottone “Nuova attività”."}
         </p>

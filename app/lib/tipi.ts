@@ -12,6 +12,7 @@ export type Progetto = {
   id: string;
   nome: string;
   stato: StatoProgetto; // calcolato dalle attività
+  inizio: string | null; // "2026-11-03" (facoltativa)
   scadenza: string | null; // "2026-12-01"
   ore: number | null; // effort del progetto, in ore (facoltativo)
   orePianificate: number; // somma delle ore assegnate a tutte le attività del progetto
@@ -30,6 +31,7 @@ export type Attivita = {
   descrizione: string;
   stato: Stato;
   priorita: Priorita;
+  inizio: string | null;
   scadenza: string | null;
   etichette: string[];
   ore: number | null; // effort dell'attività, in ore (facoltativo)

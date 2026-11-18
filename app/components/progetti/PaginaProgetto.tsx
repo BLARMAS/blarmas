@@ -18,7 +18,15 @@ import VistaProgetto from "./VistaProgetto";
 
 // Contenuto della pagina di un progetto (i dati arrivano dal server).
 // Se il progetto non esiste, o appartiene a un'altra organizzazione, il database non lo restituisce.
-export default function PaginaProgetto({ progetto, attivita }: { progetto: Progetto | undefined; attivita: Attivita[] }) {
+export default function PaginaProgetto({
+  progetto,
+  attivita,
+  oggi,
+}: {
+  progetto: Progetto | undefined;
+  attivita: Attivita[];
+  oggi: string;
+}) {
   if (!progetto) {
     return (
       <>
@@ -68,7 +76,7 @@ export default function PaginaProgetto({ progetto, attivita }: { progetto: Proge
           {avviso.testo}
         </p>
       )}
-      <VistaProgetto attivita={attivita} />
+      <VistaProgetto attivita={attivita} oggi={oggi} />
     </>
   );
 }

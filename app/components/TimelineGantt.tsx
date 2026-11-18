@@ -10,7 +10,7 @@ const colori = {
   "A rischio": { barra: "bg-attenzione-barra", testo: "a rischio" },
 };
 
-// Timeline (diagramma di Gantt) dei progetti: ogni barra va dalla creazione del progetto alla sua scadenza.
+// Timeline (diagramma di Gantt) dei progetti: ogni barra va dall'inizio del progetto (o dalla creazione, se manca) alla sua scadenza.
 // Si vedono 8 settimane a partire dalla settimana di oggi. Posizione e larghezza sono percentuali sui 56 giorni.
 export default function TimelineGantt({ progetti, oggi }: { progetti: Progetto[]; oggi: string }) {
   const inizio = lunediDi(oggi);
@@ -42,7 +42,7 @@ export default function TimelineGantt({ progetti, oggi }: { progetti: Progetto[]
           <ul>
             {progetti.map((p) => {
               // Giorni dall'inizio della timeline; la barra si ferma ai bordi se esce dal periodo
-              const da = Math.max(0, giorniTra(inizio, p.creato));
+              const da = Math.max(0, giorniTra(inizio, p.inizio ?? p.creato)); // senza data di inizio si parte dalla creazione
               const a = p.scadenza ? Math.min(GIORNI, giorniTra(inizio, p.scadenza) + 1) : null;
               const visibile = a !== null && a > da;
               return (
